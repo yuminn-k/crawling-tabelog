@@ -8,8 +8,8 @@ headers = {'User-Agent': 'Mozilla/5.0'}
 # create a list to store the data
 data_list = []
 
-# loop through each page up to page 50
-for page in range(1, 51):
+# loop through each page up to page 20
+for page in range(1, 21):
     url = base_url + str(page) + '/'
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, 'html.parser')
@@ -34,7 +34,7 @@ for page in range(1, 51):
         menu_type_tag = soup.find('span', {'property': 'v:category'})
         if menu_type_tag is not None:
             menu_type = ', '.join([tag.text.strip()
-                                  for tag in menu_type_tag.find_all('span')])
+            for tag in menu_type_tag.find_all('span')])
         else:
             menu_type = None
 
@@ -46,12 +46,15 @@ for page in range(1, 51):
         #     business_hours = 'N/A'
 
         # extract the phone number
-        phone_number = soup.find(
-            'dt', text='TEL').find_next_sibling('dd').text.strip()
+        phone_element = soup.find('dt', text='TEL')
+        if phone_element is not None:
+            phone_number = phone_element.find_next_sibling('dd').text.strip()
+        else:
+            phone_number = 'N/A'
+
 
         # create a dictionary to store the data for this restaurant
-        restaurant_data = {'title': title_text, 'address': address, 'menu_type': menu_type,
-                           'phone_number': phone_number}  # 'business_hours': business_hours,
+        restaurant_data = {'title': title_text, 'address': address, 'menu_type': menu_type, 'phone_number': phone_number}  # 'business_hours': business_hours,
 
         # add the restaurant data to the list
         data_list.append(restaurant_data)
