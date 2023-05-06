@@ -22,7 +22,7 @@ To run the script, simply run the `tabelog_crawler.py` file. The script will cra
 - Title
 - Address
 - Menu type
-- Business hours
+<!-- - Business hours -->
 - Phone number
 
 The script will store the data in a text file named `restaurant_data.txt` in the same directory.
