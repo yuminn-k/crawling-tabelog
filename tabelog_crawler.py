@@ -8,8 +8,8 @@ headers = {'User-Agent': 'Mozilla/5.0'}
 # create a list to store the data
 data_list = []
 
-# loop through each page up to page 5
-for page in range(1, 6):
+# loop through each page up to page 50
+for page in range(1, 51):
     url = base_url + str(page) + '/'
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, 'html.parser')
