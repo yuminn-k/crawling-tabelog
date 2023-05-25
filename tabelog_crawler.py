@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import os
 
 # set the base URL and headers
 base_url = 'https://tabelog.com/kr/fukuoka/rstLst/'
@@ -7,6 +8,9 @@ headers = {'User-Agent': 'Mozilla/5.0'}
 
 # create a list to store the data
 data_list = []
+
+# Create a directory to store images
+os.makedirs("restaurant_images", exist_ok=True)
 
 # loop through each page up to page 20
 for page in range(1, 21):
@@ -34,27 +38,23 @@ for page in range(1, 21):
         menu_type_tag = soup.find('span', {'property': 'v:category'})
         if menu_type_tag is not None:
             menu_type = ', '.join([tag.text.strip()
-            for tag in menu_type_tag.find_all('span')])
+                                   for tag in menu_type_tag.find_all('span')])
         else:
             menu_type = None
 
-        # extract the business hours
-        # business_hours_tags = soup.find('div', {'class': 'rdheader-subinfo__item--business-hours'}).select('p')
-        # if business_hours_tags:
-        #     business_hours = ', '.join([tag.text.strip() for tag in business_hours_tags])
-        # else:
-        #     business_hours = 'N/A'
-
-        # extract the phone number
-        phone_element = soup.find('dt', text='TEL')
-        if phone_element is not None:
-            phone_number = phone_element.find_next_sibling('dd').text.strip()
+        # Find and save the second image
+        image_tags = soup.find_all('img', {'class': 'c-img c-img--frame'})
+        if len(image_tags) > 1:
+            image_url = image_tags[1].get('src')
+            # Request and save image
+            image_data = requests.get(image_url).content
+            with open(os.path.join("restaurant_images", f"{title_text}.jpg"), 'wb') as image_file:
+                image_file.write(image_data)
         else:
-            phone_number = 'N/A'
-
+            image_url = None
 
         # create a dictionary to store the data for this restaurant
-        restaurant_data = {'title': title_text, 'address': address, 'menu_type': menu_type, 'phone_number': phone_number}  # 'business_hours': business_hours,
+        restaurant_data = {'title': title_text, 'address': address, 'menu_type': menu_type, 'image_url': image_url}
 
         # add the restaurant data to the list
         data_list.append(restaurant_data)
@@ -71,7 +71,9 @@ with open('restaurant_data.txt', 'w', encoding='utf-8') as file:
             file.write(f"Menu type: {data['menu_type']}\n")
         else:
             file.write(f"Menu type: N/A\n")
-        # file.write(f"Business hours: {data['business_hours']}\n")
-        file.write(f"Phone number: {data['phone_number']}\n\n")
+        if data['image_url'] is not None:
+            file.write(f"Image URL: {data['image_url']}\n\n")
+        else:
+            file.write(f"Image URL: N/A\n\n")
 
 print("Done.")
